@@ -6,7 +6,7 @@ import About from "./pages/About";
 
 import "./server";
 
-function App() {
+export default function App() {
   return (
     <BrowserRouter>
       <header>
@@ -24,5 +24,3 @@ function App() {
     </BrowserRouter>
   );
 }
-
-ReactDOM.createRoot(document.getElementById("root")).render(<App />);
