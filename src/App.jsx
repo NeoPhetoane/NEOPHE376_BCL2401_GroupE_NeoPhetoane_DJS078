@@ -6,7 +6,7 @@ import About from "./pages/About";
 
 import "./server";
 
-export default function App() {
+function App() {
   return (
     <BrowserRouter>
       <header>
@@ -24,3 +24,4 @@ export default function App() {
     </BrowserRouter>
   );
 }
+export default App;
