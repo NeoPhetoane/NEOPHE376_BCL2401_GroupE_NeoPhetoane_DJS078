@@ -1,85 +1,85 @@
-import React from "react"
-import { Link } from "react-router-dom"
-import { BsStarFill } from "react-icons/bs"
-import { getHostVans } from "../../api"
+import React from "react";
+import { useParams, Link, NavLink, Outlet } from "react-router-dom";
+import { getVan } from "../../api";
 
-export default function Dashboard() {
-    const [vans, setVans] = React.useState([])
-    const [loading, setLoading] = React.useState(false)
-    const [error, setError] = React.useState(null)
-    React.useEffect(() => {
-        setLoading(true)
-        getHostVans()
-            .then(data => setVans(data))
-            .catch(err => setError(err))
-            .finally(() => setLoading(false))
-    }, [])
+export default function HostVanDetail() {
+  const [currentVan, setCurrentVan] = React.useState(null);
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState(null);
+  const { id } = useParams();
 
-    function renderVanElements(vans) {
-        const hostVansEls = vans.map((van) => (
-            <div className="host-van-single" key={van.id}>
-                <img src={van.imageUrl} alt={`Photo of ${van.name}`} />
-                <div className="host-van-info">
-                    <h3>{van.name}</h3>
-                    <p>${van.price}/day</p>
-                </div>
-                <Link to={`vans/${van.id}`}>View</Link>
-            </div>
-        ))
-
-        return (
-            <div className="host-vans-list">
-                <section>{hostVansEls}</section>
-            </div>
-        )
+  React.useEffect(() => {
+    async function loadVans() {
+      setLoading(true);
+      try {
+        const data = await getVan(id);
+        setCurrentVan(data);
+      } catch (err) {
+        setError(err);
+      } finally {
+        setLoading(false);
+      }
     }
 
-    // if (loading) {
-    //     return <h1>Loading...</h1>
-    // }
+    loadVans();
+  }, [id]);
 
-    if (error) {
-        return <h1>Error: {error.message}</h1>
-    }
+  if (loading) {
+    return <h1>Loading...</h1>;
+  }
 
-    return (
-        <>
-            <section className="host-dashboard-earnings">
-                <div className="info">
-                    <h1>Welcome!</h1>
-                    <p>Income last <span>30 days</span></p>
-                    <h2>$2,260</h2>
-                </div>
-                <Link to="income">Details</Link>
-            </section>
-            <section className="host-dashboard-reviews">
-                <h2>Review score</h2>
+  if (error) {
+    return <h1>There was an error: {error.message}</h1>;
+  }
 
-                <BsStarFill className="star" />
+  const activeStyles = {
+    fontWeight: "bold",
+    textDecoration: "underline",
+    color: "#161616",
+  };
 
-                <p>
-                    <span>5.0</span>/5
-                </p>
-                <Link to="reviews">Details</Link>
-            </section>
-            <section className="host-dashboard-vans">
-                <div className="top">
-                    <h2>Your listed vans</h2>
-                    <Link to="vans">View all</Link>
-                </div>
-                {
-                    loading && !vans
-                    ? <h1>Loading...</h1>
-                    : (
-                        <>
-                            {renderVanElements(vans)}
-                        </>
-                    )
-                }
-                {/*<React.Suspense fallback={<h3>Loading...</h3>}>
-                    <Await resolve={loaderData.vans}>{renderVanElements}</Await>
-                </React.Suspense>*/}
-            </section>
-        </>
-    )
+  return (
+    <section>
+      <Link to=".." relative="path" className="back-button">
+        &larr; <span>Back to all vans</span>
+      </Link>
+      {currentVan && (
+        <div className="host-van-detail-layout-container">
+          <div className="host-van-detail">
+            <img src={currentVan.imageUrl} />
+            <div className="host-van-detail-info-text">
+              <i className={`van-type van-type-${currentVan.type}`}>
+                {currentVan.type}
+              </i>
+              <h3>{currentVan.name}</h3>
+              <h4>${currentVan.price}/day</h4>
+            </div>
+          </div>
+
+          <nav className="host-van-detail-nav">
+            <NavLink
+              to="."
+              end
+              style={({ isActive }) => (isActive ? activeStyles : null)}
+            >
+              Details
+            </NavLink>
+            <NavLink
+              to="pricing"
+              style={({ isActive }) => (isActive ? activeStyles : null)}
+            >
+              Pricing
+            </NavLink>
+            <NavLink
+              to="photos"
+              style={({ isActive }) => (isActive ? activeStyles : null)}
+            >
+              Photos
+            </NavLink>
+          </nav>
+          <Outlet context={{ currentVan }} />
+        </div>
+      )}
+    </section>
+  );
 }

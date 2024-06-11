@@ -22,6 +22,7 @@ import AuthRequired from "./components/AuthRequired";
 import "./server";
 
 function App() {
+
   return (
     <BrowserRouter>
       <Routes>
